@@ -1,0 +1,143 @@
+{% extends "template.html" %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for  message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div> 
+    {% endfor %}
+{% endif %}
+{% endwith %}
+    <div id="selling_dict_dataCache" data-cache='{{ selling_dict | tojson | safe }}' style="display: none;"></div>
+    <div id="customer_order_dataCache" data-cache='{{ customer_order_dict | tojson | safe }}' style="display: none;"></div>
+    <div id="inventory_dataCache" data-cache='{{ inventory | tojson | safe }}' style="display: none;"></div>
+    <div id="funds_dataCache" data-cache='{{ funds | tojson | safe }}' style="display: none;"></div>
+    <div class="d-flex row g-0">
+        <div class="col-2 border border-color eighty-percenter shadow" id="sales_left_bar">
+            <form id="sales_sell_product">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <select type="select" class="form-select mt-3 w-70" name="sales_select_product" id="sales_select_product" placeholder="Select Product">
+                        <option selected>Select Product</option>
+                        {% for product in products %}
+                            <option value="{{product.id}}">{{product.id}}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-primary w-50" id="sales_add_product">Add</button>
+                    <button type="button" class="btn btn-primary w-50" id="sales_clear_product">Clear</button>
+                    <table class="table table-striped table-hover w-85">
+                        <thead>
+                            <tr>
+                                <th class="small-font" scope="col">ID</th>
+                                <th class="small-font" scope="col">QUANTITY</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales_selling_table">
+                            {% for product in products %}
+                                {% if selling_dict[product.id] != 0 %}
+                                    <tr>
+                                        <td>{{product.id}}</td>
+                                        <td>{{selling_dict[product.id]}}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary w-50" data-bs-toggle="modal" data-bs-target="#sales_sell_product_modal">
+                        Sell Product
+                    </button>
+                </div>
+                <div class="modal fade" id="sales_sell_product_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-sm">
+                      <div class="modal-content">
+                        <div class="modal-header d-flex justify-content-center">
+                            <h5 class="m-3">Your sale is almost complete!</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <h5 class="m-3">Are you certain of the sale?</h5>
+                        <img class="m-3" src="{{url_for('static', filename='images/sale.jpg')}}" alt="">
+                        <div class="d-flex justify-content-center m-3">
+                          <button type="submit" class="btn btn-primary w-50">Sell</button>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-6 border eighty-percenter border-color shadow" id="sales_mid_bar">
+            <div class="container-fluid h-40">
+                <h6 class="mt-2 text-center">PRODUCT PRICE AND INVENTORY</h6>
+                <div class="manage-overflow">
+                    <table class="table table-striped table-responsive manage-overflow">
+                        <thead>
+                            <tr>
+                                <th class="small-font" scope="col">ID</th>
+                                <th class="small-font" scope="col">PRODUCT TYPE</th>
+                                <th class="small-font" scope="col">SALE PRICE</th>
+                                <th class="small-font" scope="col">PRODUCTION COST</th>
+                                <th class="small-font" scope="col">PROFIT/LOSS</th>
+                                <th class="small-font" scope="col">INVENTORY</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                                <tr>
+                                    <td class="small-font">{{product.id}}</td>
+                                    <td class="small-font">{{product.product_type}}</td>
+                                    <td class="small-font">{{product.sale_price}}</td>
+                                    <td class="small-font">{{product.production_cost}}</td>
+                                    <td class="small-font">{{product.exchange}}</td>
+                                    <td class="small-font">{{warehouse.product_storage[product.id]}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br>
+            <div class="border-bottom border-color shadow mt-4 mb-4"></div>
+            <div class="container-fluid h-40 mt-3">
+                <h6 class="mt-2 text-center">CUSTOMER ORDER DATA</h6>
+                <div class="manage-overflow">
+                    <table class="table table-striped table-responsive manage-overflow">
+                        <thead>
+                            <tr>
+                                <th class="small-font" scope="col">ID</th>
+                                <th class="small-font" scope="col">PRODUCT TYPE</th>
+                                <th class="small-font" scope="col">QUANTITY</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in customer_order_list %}
+                                <tr>
+                                    <td class="small-font">{{order[0]}}</td>
+                                    <td class="small-font">{{order[1]}}</td>
+                                    <td class="small-font">{{order[2]}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-4 border border-color shadow eighty-percenter bg-body-tertiary">
+            <div class="container-fluid h-40 ">
+                <h6 class="mt-2">SALES DEPARTMENT PRICE EXPECTATION FOR TODAY</h6>
+                {% for modifier in sales_modifiers_list %}
+                    {% if 'decrease' in modifier['text'] %}
+                        <div class="h-6 small-font" style="font-weight: bold; color: #891D00;">{{modifier['text']}} in price for {{modifier['type']}}</div>
+                    {% elif 'increase' in modifier['text'] %}
+                        <div class="h-6 small-font" style="font-weight: bold; color: #345C00;">{{modifier['text']}} in price for {{modifier['type']}}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="border-bottom border-color shadow"></div>
+            <div class="container-fluid h-50">
+                <h6 class="mt-2 small-font">PRODUCT PRICES (LAST 30 DAYS)</h6>
+                <img src="{{ url_for('static', filename='plot.png') }}" alt="Matplotlib Plot" class='img-fluid plot-image w-100' id="sales_plot_img">
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

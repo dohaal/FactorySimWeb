@@ -1,0 +1,129 @@
+{% extends "template.html" %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for  message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div> 
+    {% endfor %}
+{% endif %}
+{% endwith %}
+    <div class="d-flex row g-0 ">
+        <div class="col-3 eighty-percenter border custom-overflow">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+
+                <h6 class="mt-2">Warehouse Shelves</h6>
+                <button class="btn btn-primary m-3 w-75" type="submit" data-bs-toggle="modal" data-bs-target="#logistics_buy_shelf_modal">Buy New Shelf</button>
+
+                <div class="modal fade" id="logistics_buy_shelf_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-sm">
+                      <div class="modal-content">
+                        <div class="modal-header d-flex justify-content-center">
+                            <h5 class="m-3">Your Purchase is almost done!</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <h5 class="m-3">A new shelf costs 10000$. Are you sure you want to buy?</h5>
+                        <img class="m-3" src="{{url_for('static', filename='images/warehouse3.jpg')}}" alt="">
+                        <div class="d-flex justify-content-center m-3">
+                            <form class="w-50" action="/logistics/buy_shelf" method="post">
+                                <button type="submit" class="btn btn-primary w-100">Buy</button>
+                            </form>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+
+                {% for shelf in warehouse.shelves %}
+                    <form class=" w-85" action="/logistics/select_shelf" method="post">
+                        <input type="text" name="shelf_code" value="{{shelf.code}}" style="display: none;">
+                        <button type="submit" class="btn btn-primary p-3 custom-dark-background mb-3 rounded w-100" id="logistics_{{shelf.code}}">
+                            <h5 >Shelf Number: {{shelf.code}}</h5>
+                            {% for shelf_capacity in shelf_capacities %}
+                                {% if shelf_capacity == shelf.code %}
+                                    <h5 >Storage Capacity {{shelf_capacities[shelf_capacity]}} / 100</h5>
+                                    <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="{{shelf_capacities[shelf_capacity]}}" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar" style="width: {{shelf_capacities[shelf_capacity]}}%">{{shelf_capacities[shelf_capacity]}}%</div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </button>
+                    </form>
+                {% endfor %}
+                
+            </div>
+        </div>
+        <div class="col-6 eighty-percenter border custom-overflow">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Shelf</th>
+                        <th>Address</th>
+                        <th>Part Code</th>
+                        <th>Part Name</th>
+                        <th>Unfinished</th>
+                        <th>Being Worked</th>
+                        <th>Finished</th>
+                    </tr>
+                </thead>
+                <tbody >
+                     {% for address in current_shelf.addresses%}
+                        <tr>
+                            <td>{{current_shelf.code}}</td>
+                            <td>{{address}}</td>
+                            <td>{{current_shelf.addresses[address]}}</td>
+                            <td>{{current_shelf.partnames[address]}}</td>
+                            <td>{{current_shelf.unfinished_part_stocks[address]}}</td>
+                            <td>{{current_shelf.being_worked_on[address]}}</td>
+                            <td>{{current_shelf.finished_part_stocks[address]}}</td>
+                        </tr>
+                     {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-3 eighty-percenter border custom-overflow">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                <h6 class="mt-2">Current Raw Material Stocks</h6>
+                <form action="/logistics/transfer_materials" method="post">
+                    <div class="d-flex flex-column align-items-center justify-content-center">
+                        <select type="select" class="form-select w-70 mt-3" name="logistics_workorder_select" id="logistics_workorder_select">
+                            <option>Select Workorder</option>
+                            {% for workorder in workorders %}
+                                <option>{{workorder.id}}</option>
+                            {% endfor %}
+                        </select>
+                        <select type="select" class="form-select w-70 mt-3" name="logistics_product_select" id="logistics_product_select">
+                            <option>Select Product</option>
+                        </select>
+                        <button class="btn btn-primary mt-3" type="submit" id="logistics_transfer_materials" name="logistics_transfer_materials">Transfer Materials</button>
+                        <table class="table mini-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Material Name</th>
+                                    <th>Stocks</th>
+                                    <th>Expenditure</th>
+                                    <th>Transfer Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logistics_raw_materials_tbody">
+                                {% for material in raw_materials %}
+                                    <tr>
+                                        <td>{{material.code}}</td>
+                                        <td>{{material.name}}</td>
+                                        <td>{{warehouse.raw_material_stocks[material.code]}}</td>
+                                        <td>-</td>
+                                        <td>{{False}}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

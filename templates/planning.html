@@ -1,0 +1,270 @@
+{% extends "template.html" %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for  message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div> 
+    {% endfor %}
+{% endif %}
+{% endwith %}
+<div id="planning_dict_dataCache" data-cache='{{planning_dict | tojson | safe}}' style="display: none;"></div>
+<div class="d-flex row g-0 ">
+    <div class="col-2 border eighty-percenter ">
+        <form action="/planning">
+            <div class="d-flex flex-column justify-content-center align-items-center planning-left-bar">
+                <select type="select" class="form-select mt-4 w-70" id="planning_select_product", name="planning_select_product">
+                    <option selected>Select Product</option>
+                    {% for product in products %}
+                        <option>{{product.id}}</option>
+                    {% endfor %}
+                </select>
+                <button id="planning_add_product" type="button" class="btn btn-primary w-50">Add</button>
+                <button id="planning_clear_product" type="button" class="btn btn-primary w-50">Clear</button>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>QUANTITY</th>
+                        </tr>
+                    </thead>
+                    <tbody id="planning_workorder_table">
+                        {% for product in products %}
+                            {% if planning_dict[product.id] != 0 %}
+                                <tr>
+                                    <td>{{product.id}}</td>
+                                    <td>{{planning_dict[product.id]}}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary w-50" id="planning_create_workorder">Create Workorder</button>
+            </div>
+        </form>
+    </div>
+    <div class="col-6 border seventy-percenter">
+        <form action="/planning/switch" method="post">
+            <input name="product_id" type="text" value="{{product.id}}" style="display: none;">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <button name="planning_switch" type="submit" class="nav-link tab-text-color" value="bom">Bill of Materials</button>
+                </li>
+                <li class="nav-item">
+                    <button name="planning_switch" type="submit" class="nav-link tab-text-color" value="production_types">Production Types</button>
+                </li>
+            </ul>
+        </form>
+        <div class="manage-overflow">
+            {% if bom_flag == True %}
+            <table class="table w-50">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody class="mini-table" id="planning_general_table_tbody">
+                    <tr>
+                        <td>Product ID</td>
+                        <td>{{product.id}}</td>
+                    </tr>
+                    <tr>
+                        <td>Product Type</td>
+                        <td>{{product.product_type}}</td>
+                    </tr>
+                    <tr>
+                        <td>Distinct Part Count</td>
+                        <td>{{product.part_count}}</td>
+                    </tr>
+                    <tr>
+                        <td>Production Cost</td>
+                        <td>{{product.production_cost}}</td>
+                    </tr>
+                    <tr>
+                        <td>Production Time</td>
+                        <td>{{product.total_manufacturing_time}}</td>
+                    </tr>
+                    <tr>
+                        <td>Main Work Type</td>
+                        <td>{{product.production_type_leaning}}</td>
+                    </tr>
+                    <tr>
+                        <td>Assembly Time</td>
+                        <td>{{product.total_assembly_time}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="table table-striped manage-overflow">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Part ID</th>
+                        <th>Part Name</th>
+                        <th>Amount</th>
+                        <th>Assembly Time</th>
+                        <th>Raw Material</th>
+                        <th>RM Cost</th>
+                        <th>Operations</th>
+                        <th>Operation Times</th>
+                    </tr>
+                </thead>
+                <tbody id="planning_bom_table_tbody">
+                    {% for part in product.product_parts %}
+                        <tr>
+                            <td>{{loop.index}}</td>
+                            <td>{{part.id}}</td>
+                            <td>{{part.name}}</td>
+                            <td>{{product.part_amounts[part.id]}}</td>
+                            <td>{{part.assembly_time}} turns</td>
+                            <td>{{part.raw_material_name}}</td>
+                            <td>{{part.raw_material.cost}} $</td>
+                            <td>{{part.operations}}</td>
+                            <td>{{part.operation_times}} turns</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+          {% else %}
+            <table class="table mini-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Product Type</th>
+                        <th>Machining</th>
+                        <th>Bending</th>
+                        <th>Casting</th>
+                        <th>Forging</th>
+                        <th>Paintjob</th>
+                        <th>Welding</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in product_opr_times %}
+                    <tr>
+                        <td>{{item[0]}}</td>
+                        <td>{{item[1]}}</td>
+                        <td>{{item[2]}}</td>
+                        <td>{{item[3]}}</td>
+                        <td>{{item[4]}}</td>
+                        <td>{{item[5]}}</td>
+                        <td>{{item[6]}}</td>
+                        <td>{{item[7]}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <table class="table mini-table w-50">
+                <thead>
+                    <tr>
+                        <th>Workcenter Type</th>
+                        <th>Workcenter Workload</th>
+                        <th>Workcenter Stations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in workcenter_workload_list %}
+                    <tr>
+                        <td>{{item[0]}}</td>
+                        <td>{{item[1]}}</td>
+                        <td>{{item[2]}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+          {% endif %}
+        </div>
+
+    </div>
+    <div class="col-4 border eighty-percenter custom-overflow">
+
+        <form class="" action="/planning/delete_workorder" method="post">
+            <div class="d-flex justify-content-center mt-4">
+                <select class="form-select  w-50 me-3" name="select_delete_workorder" id="select_delete_workorder" >
+                    <option selected>Select Workorder</option>
+                    {% for workorder in workorders %}
+                        <option>{{workorder.id}}</option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-primary  " type="submit">Delete Workorder</button>
+            </div>
+        </form>
+
+        <ul class="m-3 me-5" id="myUL">
+            {% for workorder in workorders %}
+                <li>
+                    <span class="caret fw-bold">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-arrow-right-square-fill caret-svg" viewBox="0 0 16 16">
+                            <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"/>
+                          </svg>
+                        {{workorder.id}} 
+                    </span>
+                    <ul class="nested">
+                        <li><span class="fw-bold ">Products: </span>{{workorder.loaded_products}}</li>
+                        <li><span class="fw-bold ">Start Date: </span>{{workorder.date}}</li>
+                        <li><span class="fw-bold ">Finished: </span>{{workorder.finished}}</li>
+                        <li>
+                            <span class="caret fw-bold ">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-arrow-right-square-fill caret-svg" viewBox="0 0 16 16">
+                                    <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"/>
+                                </svg>
+                                Manufacturing Operations
+                            </span>
+                            <ul class="nested">
+                                {% for operation in workorder.wo_operations %}
+                                    <li>
+                                        <span class="caret fw-bold ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-arrow-right-square-fill caret-svg" viewBox="0 0 16 16">
+                                                <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"/>
+                                            </svg>
+                                            {{operation.id}}
+                                        </span>
+                                        <ul class="nested">
+                                            <li><span class="fw-bold ">Part ID: </span>{{operation.loaded_part.id}}</li>
+                                            <li><span class="fw-bold ">Task: </span>{{operation.task}}</li>
+                                            <li><span class="fw-bold ">Raw Material: </span>{{operation.raw_material}}</li>
+                                            <li><span class="fw-bold ">Part Amount: </span>{{operation.part_amount}}</li>
+                                            <li><span class="fw-bold ">Product Amount: </span>{{operation.product_amount}}</li>
+                                            <li><span class="fw-bold ">Remaining Work: </span>{{operation.remaining_work}}</li>
+                                        </ul>
+                                    </li>
+                                {% endfor %}    
+                            </ul>
+                        </li>
+                        <li>
+                            <span class="caret fw-bold">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-arrow-right-square-fill caret-svg" viewBox="0 0 16 16">
+                                    <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"/>
+                                </svg>
+                                Assembly Operations
+                            </span>
+                            <ul class="nested">
+                                {% for operation in workorder.wo_assembly_operations %}
+                                <li>
+                                    <span class="caret fw-bold ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-arrow-right-square-fill caret-svg" viewBox="0 0 16 16">
+                                            <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"/>
+                                        </svg>
+                                        {{operation.id}}
+                                    </span>
+                                    <ul class="nested">
+                                        <li><span class="fw-bold ">Part ID: </span>{{operation.loaded_part.id}}</li>
+                                        <li><span class="fw-bold ">Task: </span>{{operation.task}}</li>
+                                        <li><span class="fw-bold ">Part Amount: </span>{{operation.part_amount}}</li>
+                                        <li><span class="fw-bold ">Product Amount: </span>{{operation.product_amount}}</li>
+                                        <li><span class="fw-bold ">Remaining Work: </span>{{operation.remaining_work}}</li>
+                                    </ul>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

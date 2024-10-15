@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Factory Sim</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    </head>
+    <body>
+        <nav class="navbar bg-body-tertiary border-bottom ten-percenter p-0 m-0 g-0">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="{{url_for('core.index')}}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-buildings-fill" viewBox="0 0 16 16">
+                    <path d="M15 .5a.5.5 0 0 0-.724-.447l-8 4A.5.5 0 0 0 6 4.5v3.14L.342 9.526A.5.5 0 0 0 0 10v5.5a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V14h1v1.5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5zM2 11h1v1H2zm2 0h1v1H4zm-1 2v1H2v-1zm1 0h1v1H4zm9-10v1h-1V3zM8 5h1v1H8zm1 2v1H8V7zM8 9h1v1H8zm2 0h1v1h-1zm-1 2v1H8v-1zm1 0h1v1h-1zm3-2v1h-1V9zm-1 2h1v1h-1zm-2-4h1v1h-1zm3 0v1h-1V7zm-2-2v1h-1V5zm1 0h1v1h-1z"/>
+                </svg>
+                Factory Sim
+              </a>
+              <div class="h-6" id="funds">Funds: {{funds}}</div>
+              <div class="h-6" id="date">Date: {{date}}</div>
+              <div class="h-6" id="day">Day: {{day}}</div>
+
+              <button type="button" class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#highScoreModal">High Score</button>
+              <form action="/end_day" method="post">
+                <button name="end_day" type="submit" class="btn btn-primary">End Day</button>
+              </form>
+            </div>
+          </nav>
+          <nav class="navbar bg-body-tertiary border-bottom ten-percenter p-0 m-0 g-0" id="second_navbar">
+            <div class="container-fluid h-100">
+              <div class="d-flex flex-row align-items-center justify-content-center navbar-nav h-100">
+                <a class="nav-link navbar-hover custom_btn_width main_button h-100 d-flex align-items-center justify-content-center" href="{{url_for('sales.main')}}"><div><h6 class="mb-0 h-100 text-center">Sales</h6></div></a>
+                <a class="nav-link navbar-hover custom_btn_width main_button h-100 d-flex align-items-center justify-content-center" href="{{url_for('production.main')}}"><div><h6 class="mb-0 h-100 text-center">Production</h6></div></a>
+                <a class="nav-link navbar-hover custom_btn_width main_button h-100 d-flex align-items-center justify-content-center" href="{{url_for('planning.main')}}"><div><h6 class="mb-0">Planning</h6></div></a>
+                <a class="nav-link navbar-hover custom_btn_width main_button h-100 d-flex align-items-center justify-content-center" href="{{url_for('logistics.main')}}"><div><h6 class="mb-0">Logistics</h6></div></a>
+                <a class="nav-link navbar-hover custom_btn_width main_button h-100 d-flex align-items-center justify-content-center" href="{{url_for('procurement.main')}}"><div><h6 class="mb-0">Procurement</h6></div></a>
+              </div>
+            </div>
+          </nav>
+
+          <!--Highscore modal-->
+          <div class="modal" id="highScoreModal" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">SAVE YOUR SCORE!</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form action="/highscore" method="post">
+                    <input name="name" type="text" class="form-control" placeholder="Input Name">
+                    <br>
+                    <input name="score" type="number" class="form-control"   value="{{funds}}" readonly >
+                    <br>
+
+                    <button type="submit" class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#highScoreModal">Submit Score</button>
+                  </form>
+
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Player Name</th>
+                        <th>Score</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% if players %}
+                        {% for player in players %}
+                          <tr>
+                            <td>{{player.player_name}}</td>
+                            <td>{{player.score}}</td>
+                          </tr>
+
+                        {% endfor %}
+                      {% endif %}
+                    </tbody>
+                  </table>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+        {% block content %}
+        {% endblock %}
+    </body>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>  
+</html>

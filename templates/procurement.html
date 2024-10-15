@@ -1,0 +1,120 @@
+{% extends "template.html" %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for  message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div> 
+    {% endfor %}
+{% endif %}
+{% endwith %}
+    <div class="d-flex row g-0">
+        <div class="col-6 eighty-percenter border custom-overflow">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                <h5 class="mt-2">Raw Materials</h5>
+                {% for material in raw_materials %}
+                    <form class="mt-3 w-95" action="/procurement/buy" method="post" >
+                        <input type="text" name="select_material_{{material.code}}" value="{{material.code}}" style="display: none;">
+                        <div class="btn btn-primary w-100 raw_material_widget" id="procurement_{{material.code}}_widget" >
+                            <div class="d-flex align-items-center">
+
+                                <button type="button" class="btn btn-success me-3" data-bs-toggle="modal" data-bs-target="#procurement_buy_{{material.code}}">Buy</button>
+                                <div class="modal fade" id="procurement_buy_{{material.code}}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-sm">
+                                      <div class="modal-content">
+                                        <div class="modal-header d-flex justify-content-center">
+                                            <h5 class="m-3">Your purchase is almost complete!</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <h5 class="m-3">Are you certain of the purchase?</h5>
+                                        <img class="m-3" src="{{url_for('static', filename='images/buy.jpg')}}" alt="">
+                                        <div class="d-flex justify-content-center m-3">
+                                          <button type="submit" class="btn btn-primary w-50">Buy</button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                </div>
+
+                                <input type="number" placeholder="Input Integer" name="procurement_quantity_{{material.code}}" class="me-3 form-control w-30 procurement_quantity" id="">
+                                <div class="d-flex flex-column me-3">
+                                    <h6>Raw Material: {{material.name}}</h6>
+                                    <h6>Total Cost: {{0}}</h6>
+                                </div>
+                                <div class="d-flex flex-column me-3">
+                                    <h6>Unit Cost: {{material.cost}}</h6>
+                                    <h6>Min Order Qnt: {{material.minimum_order_quantity}}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-6 eighty-percenter border ">
+            <div class="container-fluid h-45 border g-0 custom-overflow">
+                <form action="/procurement/switch" method="post">
+                    <!--input name="product_id" type="text" value="" style="display: none;"-->
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <button name="procurement_switch" type="submit" class="nav-link tab-text-color" value="market_expectations">Market Expectations</button>
+                        </li>
+                        <li class="nav-item">
+                            <button name="procurement_switch" type="submit" class="nav-link tab-text-color" value="current_stocks">Current Stocks</button>
+                        </li>
+                    </ul>
+                </form>
+                {% if procurement_switch == "market_expectations" %}
+                <div class="ms-3">
+                    <h6 class="mt-2">Procurement Department Cost Expectations</h6>
+                    {% for modifier in procurement_modifiers_list %}
+                        {% if 'decrease' in modifier['text'] %}
+                            <div class="h-6 small-font" style="font-weight: bold; color: #891D00;">{{modifier['text']}} in price for {{modifier['type']}}</div>
+                        {% elif 'increase' in modifier['text'] %}
+                            <div class="h-6 small-font" style="font-weight: bold; color: #345C00;">{{modifier['text']}} in price for {{modifier['type']}}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% elif procurement_switch == "current_stocks" %}
+                    <div class="d-flex flex-column">
+                        <select type="select" class="form-select w-30 mt-3 ms-3" name="logistics_workorder_select" id="logistics_workorder_select">
+                            <option>Select Workorder</option>
+                            {% for workorder in workorders %}
+                                <option>{{workorder.id}}</option>
+                            {% endfor %}
+                        </select>
+                        <select type="select" class="form-select w-30 mt-3 ms-3" name="logistics_product_select" id="logistics_product_select">
+                            <option>Select Product</option>
+                        </select>
+                        <table class="table mini-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Material Name</th>
+                                    <th>Stocks</th>
+                                    <th>Expenditure</th>
+                                    <th>Transfer Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logistics_raw_materials_tbody">
+                                {% for material in raw_materials %}
+                                    <tr>
+                                        <td>{{material.code}}</td>
+                                        <td>{{material.name}}</td>
+                                        <td>{{warehouse.raw_material_stocks[material.code]}}</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="border h-55 g-0">
+                <img class='img-fluid plot-image w-85 bg-dark' src="{{url_for('static', filename='plot.png')}}" alt="">
+            </div>
+        </div>
+    </div>
+{% endblock %}

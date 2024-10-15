@@ -1,0 +1,125 @@
+{% extends "template.html" %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for  message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div> 
+    {% endfor %}
+{% endif %}
+{% endwith %}
+<div id="workcenters_dataCache" data-cache='{{workcenter_ids | tojson | safe}}' style="display: none;"></div>
+    <div class="d-flex row g-0">
+        <div class="col-6 border eighty-percenter">
+            <div class="container-fluid manage-overflow ">
+                {% for workcenter in workcenters %}
+                    <form action="/production/workstation" name="workcenter_id" method="post">
+                        <input type="text" name="workcenter_data" value="{{workcenter.id}}" style="display: none;">
+                        <div class="container d-flex g-0 m-2 production-widget rounded" id="production_widget_{{workcenter.id}}">
+                            {% if workcenter.active == False %}
+                                <button class="btn btn-primary" type="button" id="production_{{workcenter.id}}_start">Start</button>
+                                <button type="submit" class="btn production-widget container-fluid d-flex rounded" >
+                                    <div class="container-fluid text-center">
+                                        <p>ID: {{workcenter.id}}</p>
+                                        <p>PROD METHOD: {{workcenter.prod_method}}</p>
+                                        <p>ACTIVE: {{workcenter.active}}</p>
+                                    </div>
+                                    <div class="container-fluid text-center">
+                                        <p>OPR COST: {{workcenter.operating_cost}}</p>
+                                        <p>OPERATIONS: {{workcenter.operator_count}}</p>
+                                        <p>STATIONS: {{workcenter.station_count}}</p>
+                                    </div>
+                                    <div class="container-fluid text-center">
+                                        {% if workcenter.operations | length > 0 %}
+                                            <p>OPERATIONS: {{workcenter.operations[0].id}}</p>
+                                            <p>REMAINING WORK: {{workcenter.operations[0].remaining_work}}</p>
+                                            <p>WORKORDER: {{workcenter.operations[0].workorder_id}}</p>
+                                        {% else %}
+                                            <p>OPERATIONS: none</p>
+                                            <p>REMAINING WORK: none</p>
+                                            <p>WORKORDER: none</p>                            
+                                        {% endif %}
+                                    </div>
+                                </button>
+                            {% else %}
+                                <button class="btn btn-danger" type="button" id="production_{{workcenter.id}}_stop">Stop</button>
+                                <button type="submit" class="btn btn-success container-fluid d-flex rounded" >
+                                    <div class="container-fluid text-center">
+                                        <p>ID: {{workcenter.id}}</p>
+                                        <p>PROD METHOD: {{workcenter.prod_method}}</p>
+                                        <p>ACTIVE: {{workcenter.active}}</p>
+                                    </div>
+                                    <div class="container-fluid text-center">
+                                        <p>OPR COST: {{workcenter.operating_cost}}</p>
+                                        <p>OPERATIONS: {{workcenter.operator_count}}</p>
+                                        <p>STATIONS: {{workcenter.station_count}}</p>
+                                    </div>
+                                    <div class="container-fluid text-center">
+                                        {% if workcenter.operations | length > 0 %}
+                                            <p>OPERATIONS: {{workcenter.operations[0].id}}</p>
+                                            <p>REMAINING WORK: {{workcenter.operations[0].remaining_work}}</p>
+                                            <p>WORKORDER: {{workcenter.operations[0].workorder_id}}</p>
+                                        {% else %}
+                                            <p>OPERATIONS: none</p>
+                                            <p>REMAINING WORK: none</p>
+                                            <p>WORKORDER: none</p>                            
+                                        {% endif %}
+                                    </div>
+                                </button>
+                            {% endif %}
+
+                        </div>
+                    </form>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-6 border eighty-percenter custom-overflow">
+            <table class="table table-striped table-responsive">
+                <thead>
+                    <tr>
+                        <th>WORKCENTER ID</th>
+                        <th>TOTAL WORK</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{current_workcenter.id}}</td>
+                        <td>{{current_operations_total_work}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="table table-striped table-responsive">
+                <thead>
+                    <tr>
+                        <th>NO</th>
+                        <th>OPERATION ID</th>
+                        <th>PRODUCT ID</th>
+                        <th>PART ID</th>    
+                        <th>WORKORDER ID</th>
+                        <th>TASK</th>
+                        <th>NEEDED AMOUNT</th>
+                        <th>REMAINING WORK</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if current_workcenter.operations | length > 0 %}
+                        {% for operation in current_workcenter.operations %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{operation.id}}</td>
+                            <td>{{operation.product_id}}</td>
+                            <td>{{operation.loaded_part.id}}</td>
+                            <td>{{operation.workorder_id}}</td>
+                            <td>{{operation.task}}</td>
+                            <td>{{operation.part_amount * operation.product_amount}}</td>
+                            <td>{{operation.remaining_work}} turns</td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

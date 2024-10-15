@@ -1,0 +1,161 @@
+.custom_btn_width {
+    min-width: 130px;
+}
+.main_button:hover {
+    background-color: rgb(49, 47, 47) !important;
+    color: white !important;
+}
+.main_button {
+    color: black !important;
+}
+.btn-primary {
+    background-color: rgb(49, 47, 47);
+    border: none;
+}
+.btn-primary:hover {
+    background-color: rgb(255, 193, 7);
+    color: black;
+    border: none;
+}
+/* did not work so i commented it out. dont know why it doesnt work */
+/*.btn-primary:active {
+    background-color: rgb(255, 193, 7);
+    color: black;
+    border: none;
+}*/
+.ten-percenter {
+    height: 10vh;
+}
+.eighty-percenter {
+    height: 80vh;
+}
+.seventy-percenter {
+    height: 70vh;
+}
+#sales_left_bar *{
+    margin-bottom: 2vh;
+}
+.small-font {
+    font-size: small;
+}
+.h-30 {
+    height: 30% !important;
+}
+.h-40 {
+    height: 40%;
+}
+.h-45 {
+    height: 45%;
+}
+.h-55 {
+    height: 55%;
+}
+.h-75 {
+    height: 75%;
+}
+.h-60 {
+    height: 60%;
+}
+.w-30 {
+    width: 30%;
+}
+.w-70 {
+    width: 70%;
+  }
+.w-85 {
+    width: 85%;
+  }
+.w-95 {
+    width: 95%;
+}
+.manage-overflow {
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+.custom-overflow {
+    overflow-y: scroll;
+}
+.plot-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: fill; 
+}
+.container-fluid > p {
+    padding: 0;
+}
+
+.production-widget:hover {
+    background-color: rgb(56, 62, 66);
+    color: white;   
+}
+.production-widget {
+    background-color: lightgrey;
+    color: black;
+}
+tr > th {
+    font-size: small !important;
+}
+tr > td {
+    font-size: small !important;
+}
+.border-color {
+    border-color: silver !important;
+}
+.planning-left-bar *{
+    margin-bottom: 2vh;
+}
+.mini-table tr td{
+    padding: 0% !important;
+    padding-left: 1vw !important;
+}
+.tab-text-color {
+    color: rgb(56, 62, 66);
+    font-weight: bold;
+}
+
+
+/*planning tree view*/
+ul, #myUL {
+    list-style-type: none;
+}
+#myUL {
+    margin: 0;
+    padding: 0;
+}
+.caret {
+    cursor: pointer;
+    user-select: none;
+
+}
+.caret-svg {
+    transition: transform 0.3s ease-in-out;
+    display: inline-block;
+}
+.rotated {
+    transform: rotate(90deg);
+    display: inline-block;
+}
+.nested {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+}
+.active {   
+    max-height: 5000px;
+}
+.production-active {
+    display: inline;
+}
+.production-passive {
+    display: none;
+}
+
+.custom-dark-background {
+    background-color: rgb(49, 47, 47);
+}
+.custom-container {
+    height: 50vh; /* or any height you need */
+  }
+
